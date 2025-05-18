@@ -1,0 +1,10 @@
+datasets
+evaluate
+accelerate
+transformers~=4.49.0
+einops
+sacremoses
+aiogram==2.25.1
+requests~=2.32.3
+torch~=2.6.0
+pillow~=11.1.0
