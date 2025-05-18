@@ -290,6 +290,7 @@ async def remaining_nutrients(message: types.Message):
         f"Белки: {max_protein - total_protein}, Жиры: {max_fat - total_fat}, Углеводы: {max_carbs - total_carbs}"
     )
 
+
 @dp.message_handler(lambda message: message.text == "Прислать фотографию")
 async def ask_for_photo(message: types.Message):
     await PhotoState.waiting_for_photo.set()
