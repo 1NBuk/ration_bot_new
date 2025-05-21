@@ -1,5 +1,3 @@
-# выделяем индексы еды, которую едят по несколько кусочков
-from bot import update_daily_intake
 from models import *
 import torch
 from dict import *
@@ -50,6 +48,7 @@ def advice(url):
 import re
 
 def process_and_save_calories(user_id, today, url):
+    from bot import update_daily_intake
     """
     Обрабатывает изображение, извлекает данные о калориях и БЖУ,
     и сохраняет их в таблицу DailyIntake.

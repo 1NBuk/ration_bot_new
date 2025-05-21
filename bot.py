@@ -252,10 +252,6 @@ async def back_to_main_menu(message: types.Message):
     await message.reply("Вы вернулись в главное меню.", reply_markup=main_keyboard)
 
 
-@dp.message_handler(lambda message: message.text == "Назад в меню")
-async def back_to_main_menu(message: types.Message):
-    await message.reply("Вы вернулись в главное меню.", reply_markup=main_keyboard)
-
 
 @dp.message_handler(lambda message: message.text == "Посмотреть калории за день")
 async def daily_calories(message: types.Message):
