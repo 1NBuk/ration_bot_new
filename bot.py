@@ -1,29 +1,25 @@
 import logging
-import nest_asyncio
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils.executor import start_polling
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database.db import create_database
+from keyboards import main_keyboard
+from handlers import account, intake, photo
 
-# Логирование
 logging.basicConfig(level=logging.INFO)
-nest_asyncio.apply()
 
-# Инициализация
 bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-# Создание БД
 create_database()
 
-# Подключение обработчиков
-from handlers import account, intake, photo
-account.register(dp)
-intake.register(dp)
-photo.register(dp)
+# Регистрация хендлеров
+dp.register_message_handler(account.view_account_menu, lambda m: m.text == "Просмотр своего аккаунта")
+dp.register_message_handler(account.view_account, lambda m: m.text == "Просмотр аккаунта")
+dp.register_message_handler(account.edit_name_start, lambda m: m.text == "Редактирование имени")
+dp.register_message_handler(account.edit_name, state=account.UserState.editing_name)
 
-# Запуск
 if __name__ == "__main__":
-    from aiogram import executor
-    executor.start_polling(dp, skip_updates=True)
+    start_polling(dp, skip_updates=True)

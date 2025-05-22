@@ -2,10 +2,12 @@ import pytest
 import sqlite3
 import asyncio
 import time
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, ANY
 from aiogram import types
 
-from bot import create_database, DB_PATH
+from bot import create_database
+from config import DB_PATH
+from database.db import get_user_data
 
 
 @pytest.fixture(scope="module")
@@ -27,100 +29,62 @@ def setup_db():
 
 
 @pytest.mark.asyncio
-@patch("bot.dp")
-@patch("bot.get_user_data")
-async def test_start_command(mock_get_user_data, mock_dp):
-    mock_get_user_data.return_value = (123456, "testuser")
+async def test_view_account_menu():
+    from handlers.account import view_account_menu
 
-    message = types.Message(
-        message_id=1,
-        date=int(time.time()),  # <-- Unix timestamp
-        chat=types.Chat(id=123456, type="private"),
-        from_user=types.User(id=123456, is_bot=False, first_name="TestUser"),
-        text="/start"
-    )
-    update = types.Update(message=message)
+    message = AsyncMock()
+    message.reply = AsyncMock()
 
-    mock_dp.feed_update = AsyncMock(return_value=None)
-    await mock_dp.feed_update(update)
-
-    user_data = mock_get_user_data(123456)
-    assert user_data is not None
-    assert user_data[1] == "testuser"
+    await view_account_menu(message)
+    message.reply.assert_called_with("Выберите действие:", reply_markup=ANY)
 
 
 @pytest.mark.asyncio
-@patch("bot.dp")
-async def test_view_account_menu(mock_dp):
-    message = types.Message(
-        message_id=2,
-        date=int(time.time()),
-        chat=types.Chat(id=123456, type="private"),
-        from_user=types.User(id=123456, is_bot=False, first_name="TestUser"),
-        text="Просмотр своего аккаунта"
-    )
-    update = types.Update(message=message)
+async def test_view_account():
+    from handlers.account import view_account
 
-    mock_dp.feed_update = AsyncMock(return_value=None)
-    await mock_dp.feed_update(update)
+    message = AsyncMock()
+    message.from_user.id = 123456
+    message.reply = AsyncMock()
+
+    await view_account(message)
+    message.reply.assert_called_with(ANY)
 
 
 @pytest.mark.asyncio
-@patch("bot.dp")
-@patch("bot.get_user_data")
-async def test_edit_name_and_save(mock_get_user_data, mock_dp):
-    from aiogram.dispatcher import FSMContext
+async def test_daily_calories():
+    from handlers.intake import daily_calories
 
-    mock_state = AsyncMock()
-    mock_state.set_state = AsyncMock()
+    message = AsyncMock()
+    message.from_user.id = 123456
+    message.reply = AsyncMock()
 
-    mock_dp.current_state = AsyncMock(return_value=mock_state)
-
-    message = types.Message(
-        message_id=3,
-        date=int(time.time()),
-        chat=types.Chat(id=123456, type="private"),
-        from_user=types.User(id=123456, is_bot=False, first_name="TestUser"),
-        text="NewName"
-    )
-    update = types.Update(message=message)
-
-    mock_dp.feed_update = AsyncMock(return_value=None)
-    await mock_dp.feed_update(update)
-
-    mock_get_user_data.return_value = (123456, "NewName")
-
-    user_data = mock_get_user_data(123456)
-    assert user_data[1] == "NewName"
+    await daily_calories(message)
+    message.reply.assert_called_with(ANY)
 
 
 @pytest.mark.asyncio
-@patch("bot.dp")
-async def test_daily_calories(mock_dp):
-    message = types.Message(
-        message_id=4,
-        date=int(time.time()),
-        chat=types.Chat(id=123456, type="private"),
-        from_user=types.User(id=123456, is_bot=False, first_name="TestUser"),
-        text="Посмотреть калории за день"
-    )
-    update = types.Update(message=message)
+async def test_remaining_nutrients():
+    from handlers.intake import remaining_nutrients
 
-    mock_dp.feed_update = AsyncMock(return_value=None)
-    await mock_dp.feed_update(update)
+    message = AsyncMock()
+    message.from_user.id = 123456
+    message.reply = AsyncMock()
+
+    await remaining_nutrients(message)
+    message.reply.assert_called_with(ANY)
 
 
 @pytest.mark.asyncio
-@patch("bot.dp")
-async def test_remaining_nutrients(mock_dp):
-    message = types.Message(
-        message_id=5,
-        date=int(time.time()),
-        chat=types.Chat(id=123456, type="private"),
-        from_user=types.User(id=123456, is_bot=False, first_name="TestUser"),
-        text="Сколько ещё надо съесть"
-    )
-    update = types.Update(message=message)
+async def test_back_to_menu():
+    from handlers.photo import back_to_menu
+    from keyboards import main_keyboard
 
-    mock_dp.feed_update = AsyncMock(return_value=None)
-    await mock_dp.feed_update(update)
+    message = AsyncMock()
+    message.reply = AsyncMock()
+    state = MagicMock()
+    state.finish = AsyncMock()
+
+    await back_to_menu(message, state)
+    state.finish.assert_awaited()
+    message.reply.assert_called_with("Вы вернулись в главное меню.", reply_markup=main_keyboard)

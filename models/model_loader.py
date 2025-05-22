@@ -1,10 +1,4 @@
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    AutoImageProcessor,
-    ViTForImageClassification,
-    AutoModelForSeq2SeqLM
-)
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoImageProcessor, ViTForImageClassification, AutoModelForSeq2SeqLM
 
 def load_models():
     model_id = "vikhyatk/moondream2"
