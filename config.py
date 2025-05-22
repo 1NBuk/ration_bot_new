@@ -1,0 +1,2 @@
+BOT_TOKEN = "7153682251:AAHG-E4tQgL5uZV1RgUv0nEf2SVxOXniOT8"
+DB_PATH = "nutrition_bot.db"
